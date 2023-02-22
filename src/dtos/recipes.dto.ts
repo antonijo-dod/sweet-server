@@ -1,4 +1,4 @@
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsString, IsArray } from 'class-validator';
 
 export class CreateRecipeDto {
   @IsString()
@@ -9,5 +9,8 @@ export class CreateRecipeDto {
 
   @IsString()
   public description: string;
+
+  @IsArray()
+  public ingredients: [];
 }
 

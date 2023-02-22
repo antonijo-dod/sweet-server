@@ -8,12 +8,11 @@ class RecipeService {
   public recipe = new PrismaClient().recipe;
 
   public async findAllRecipes(): Promise<Recipe[]> {
-    const allRecipes: Recipe[] = await this.recipe.findMany();
+    const allRecipes: Recipe[] = await this.recipe.findMany({ include: { ingredients: true } });
     return allRecipes;
   }
 
   public async findRecipeBySlug(recipeSlug: string): Promise<Recipe> {
-    console.log("🚀 ~ file: recipes.service.ts:16 ~ RecipeService ~ findRecipeBySlug ~ recipeSlug:", recipeSlug)
     if (isEmpty(recipeSlug)) throw new HttpException(400, "RecipeSlug is empty");
 
     const findRecipe: Recipe[] = await this.recipe.findMany({ where: { slug: recipeSlug } });
@@ -24,14 +23,31 @@ class RecipeService {
 
   public async createRecipe(recipeData: CreateRecipeDto, authUser): Promise<Recipe> {
     // Create slug with slugify if slug is not provided from frontend
-    
+
     if (isEmpty(recipeData)) throw new HttpException(400, "RecipeData is empty");
+
+    const { ingredients } = recipeData;
 
     const findRecipe: Recipe[] = await this.recipe.findMany({ where: { slug: recipeData.slug } });
     if (findRecipe.length > 0) throw new HttpException(409, `This slug ${recipeData.slug} already exists`);
 
-    const createRecipeData: Recipe = await this.recipe.create({ data: {...recipeData, authorId: authUser.id} });
+    const createRecipeData: Recipe = await this.recipe.create({ data: { ...recipeData, authorId: authUser.id, ingredients: {
+      
+    }}});
     return createRecipeData;
+  }
+
+  public async updateRecipe(recipeId: number, recipeData: CreateRecipeDto): Promise<Recipe> {
+    if (isEmpty(recipeData)) throw new HttpException(400, "RecipeData is empty");
+
+    
+    const findRecipe: Recipe = await this.recipe.findUnique({ where: { id: recipeId } });
+    if (!findRecipe) throw new HttpException(409, "Recipe doesn't exist");
+    
+    const { ingredients } = recipeData;
+    
+    const updateRecipeData = await this.recipe.update({ where: { id: recipeId }, data: { ...recipeData} });
+    return updateRecipeData;
   }
 
   public async deleteRecipe(recipeSlug: string): Promise<Recipe> {
