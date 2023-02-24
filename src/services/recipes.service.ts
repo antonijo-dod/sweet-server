@@ -1,4 +1,3 @@
-import { hash } from 'bcrypt';
 import { PrismaClient, Recipe } from '@prisma/client';
 import { CreateRecipeDto } from '@dtos/recipes.dto';
 import { HttpException } from '@exceptions/HttpException';
@@ -16,7 +15,7 @@ class RecipeService {
   public async findRecipeBySlug(recipeSlug: string): Promise<Recipe> {
     if (isEmpty(recipeSlug)) throw new HttpException(400, "RecipeSlug is empty");
 
-    const findRecipe: Recipe[] = await this.recipe.findMany({ where: { slug: recipeSlug } });
+    const findRecipe: Recipe[] = await this.recipe.findMany({ where: { slug: recipeSlug }, include: { ingredients: {include: {ingredient: true}} }});
     if (!findRecipe) throw new HttpException(409, "Recipe doesn't exist");
 
     return findRecipe[0];
@@ -55,6 +54,9 @@ class RecipeService {
     if (!findRecipe) throw new HttpException(409, "Recipe doesn't exist");
     
     const { ingredients } = recipeData;
+
+    const checkIfIngredientsIdExist = await this.ingredient.findMany({ where: { id: { in: ingredients.map(ingredient => ingredient.id) } } });
+    if (checkIfIngredientsIdExist.length !== ingredients.length) throw new HttpException(409, "One or more ingredients doesn't exist");
     
     const updateRecipeData = await this.recipe.update({ where: { id: recipeId }, data: { ...recipeData, ingredients: {
      deleteMany: {
@@ -73,13 +75,14 @@ class RecipeService {
     return updateRecipeData;
   }
 
-  public async deleteRecipe(recipeSlug: string): Promise<Recipe> {
-    if (isEmpty(recipeSlug)) throw new HttpException(400, "You didn't provide a recipe slug");
+  public async deleteRecipe(recipeId: number): Promise<Recipe> {
+    // When delete a recipe, delete all ingredients related to this recipe
+    if (isEmpty(recipeId)) throw new HttpException(400, "You didn't provide a recipe slug");
 
-    const findRecipe: Recipe[] = await this.recipe.findMany({ where: { slug: recipeSlug } });
-    if (!findRecipe[0]) throw new HttpException(409, "Recipe doesn't exist");
+    const findRecipe: Recipe = await this.recipe.findUnique({ where: { id: recipeId } });
+    if (!findRecipe) throw new HttpException(409, "Recipe doesn't exist");
 
-    const deleteRecipeData = await this.recipe.delete({ where: { id: findRecipe[0].id } });
+    const deleteRecipeData = await this.recipe.delete({ where: { id: recipeId} });
     return deleteRecipeData;
   }
 

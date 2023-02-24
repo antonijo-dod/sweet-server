@@ -52,8 +52,8 @@ class RecipesController {
 
   public deleteRecipe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const recipeSlug = req.params.slug;
-      const deleteRecipeData: Recipe = await this.recipeService.deleteRecipe(recipeSlug);
+      const recipeId = Number(req.params.id);
+      const deleteRecipeData: Recipe = await this.recipeService.deleteRecipe(recipeId);
 
       res.status(200).json({ data: deleteRecipeData, message: 'deleted' });
     } catch (error) {
