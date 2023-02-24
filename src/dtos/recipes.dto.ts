@@ -11,6 +11,9 @@ export class CreateRecipeDto {
   public description: string;
 
   @IsArray()
-  public ingredients: {amount: string}[]
+  public ingredients: {amount: string, id: number}[]
+
+  @IsArray()
+  public categories: []
 }
 

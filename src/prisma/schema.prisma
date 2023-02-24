@@ -34,23 +34,23 @@ model Recipe {
   published   Boolean               @default(false)
   author      User                  @relation(fields: [authorId], references: [id])
   authorId    Int
-  categories  CategorieOnRecipe[]
+  categories  CategoryOnRecipe[]
 }
 
-model Categorie {
+model Category {
   id      Int      @id @default(autoincrement())
   name    String   @unique
   slug    String   @unique
-  recipes CategorieOnRecipe[]
+  recipes CategoryOnRecipe[]
 }
 
-model CategorieOnRecipe {
-  categorie   Categorie @relation(fields: [categorieId], references: [id])
-  categorieId Int
+model CategoryOnRecipe {
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
   recipe      Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId    Int
 
-  @@id([categorieId, recipeId])
+  @@id([categoryId, recipeId])
 }
 
 model Ingredient {
