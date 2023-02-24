@@ -45,12 +45,11 @@ model Ingredient {
 }
 
 model IngredientsOnRecipe {
+  amount      String
   recipe       Recipe     @relation(fields: [recipeId], references: [id])
   recipeId     Int
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
   ingredientId Int
-  assignedAt DateTime @default(now())
-  assignedBy String
 
   @@id([recipeId, ingredientId])
 }
