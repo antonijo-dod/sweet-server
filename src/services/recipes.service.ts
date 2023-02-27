@@ -58,8 +58,9 @@ class RecipeService {
               }
             }
           }))
-        }
-      }
+        },
+      },
+      include: { ingredients: { include: { ingredient: true } }, categories: { include: { category: true } } }
     });
     return createRecipeData;
   }
@@ -108,7 +109,8 @@ class RecipeService {
             }
           }))
         }
-      }
+      },
+      include: { ingredients: { include: { ingredient: true } }, categories: { include: { category: true } } }
     });
     return updateRecipeData;
   }
