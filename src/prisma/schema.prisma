@@ -24,19 +24,21 @@ model User {
 }
 
 model Recipe {
-  id            Int                   @id @default(autoincrement())
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
-  name          String
-  slug          String                @unique
-  description   String?
-  featuredImage Image?
-  galleryImages ImageOnRecipe[]
-  ingredients   IngredientsOnRecipe[]
-  published     Boolean               @default(false)
-  author        User                  @relation(fields: [authorId], references: [id])
-  authorId      Int
-  categories    CategoryOnRecipe[]
+  id              Int                   @id @default(autoincrement())
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  name            String
+  slug            String                @unique
+  description     String?
+  featuredImage   Image?                @relation(fields: [featuredImageId], references: [id])
+  featuredImageId Int?                  
+  recipeId        Int?                  @unique
+  galleryImages   ImageOnRecipe[]
+  ingredients     IngredientsOnRecipe[]
+  published       Boolean               @default(false)
+  author          User                  @relation(fields: [authorId], references: [id])
+  authorId        Int
+  categories      CategoryOnRecipe[]
 }
 
 model ImageOnRecipe {
@@ -45,16 +47,17 @@ model ImageOnRecipe {
   recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId Int
 
+  
+
   @@id([imageId, recipeId])
 }
 
 model Image {
-  id       Int             @id @default(autoincrement())
-  url      String
-  publicId String
-  recipes  ImageOnRecipe[]
-  user     Recipe?         @relation(fields: [recipeId], references: [id])
-  recipeId Int?            @unique // relation scalar field (used in the `@relation` attribute above)
+  id            Int             @id @default(autoincrement())
+  url           String
+  publicId      String
+  recipes       ImageOnRecipe[]
+  featuredImages Recipe[]
 }
 
 model Category {

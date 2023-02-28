@@ -9,7 +9,15 @@ class RecipeService {
   public categories = new PrismaClient().category;
 
   public async findAllRecipes(): Promise<Recipe[]> {
-    const allRecipes: Recipe[] = await this.recipe.findMany({ include: { ingredients: { include: { ingredient: true } }, categories: { include: { category: true } } } });
+    const allRecipes: Recipe[] = await this.recipe.findMany({
+      include:
+      {
+        ingredients: { include: { ingredient: true } },
+        categories: { include: { category: true } },
+        galleryImages: {include: {image: true}},
+        featuredImage: true
+      },
+    });
     return allRecipes;
   }
 
@@ -27,7 +35,7 @@ class RecipeService {
 
     if (isEmpty(recipeData)) throw new HttpException(400, "RecipeData is empty");
 
-    const { ingredients, categories } = recipeData;
+    const { ingredients, categories, galleryImages } = recipeData;
 
     const checkIfIngredientsIdExist = await this.ingredient.findMany({ where: { id: { in: ingredients.map(ingredient => ingredient.id) } } });
     if (checkIfIngredientsIdExist.length !== ingredients.length) throw new HttpException(409, "One or more ingredients doesn't exist");
@@ -59,6 +67,15 @@ class RecipeService {
             }
           }))
         },
+        galleryImages: {
+          create: galleryImages.map(imageId => ({
+            image: {
+              connect: {
+                id: imageId
+              }
+            }
+          }))
+        }
       },
       include: { ingredients: { include: { ingredient: true } }, categories: { include: { category: true } } }
     });
@@ -71,7 +88,8 @@ class RecipeService {
     const findRecipe: Recipe = await this.recipe.findUnique({ where: { id: recipeId }, include: { ingredients: true } });
     if (!findRecipe) throw new HttpException(409, "Recipe doesn't exist");
 
-    const { ingredients, categories } = recipeData;
+    const { ingredients, categories, images } = recipeData;
+    console.log("🚀 ~ file: recipes.service.ts:75 ~ RecipeService ~ updateRecipe ~ images:", images)
 
     const checkIfIngredientsIdExist = await this.ingredient.findMany({ where: { id: { in: ingredients.map(ingredient => ingredient.id) } } });
     if (checkIfIngredientsIdExist.length !== ingredients.length) throw new HttpException(409, "One or more ingredients doesn't exist");
@@ -105,6 +123,19 @@ class RecipeService {
             category: {
               connect: {
                 id: categoryId
+              }
+            }
+          }))
+        },
+        galleryImages: {
+          deleteMany: {
+            recipeId: recipeId,
+            NOT: images.map(({ recipeId }) => ({ recipeId })),
+          },
+          create: images.map(imageId => ({
+            image: {
+              connect: {
+                id: imageId
               }
             }
           }))
