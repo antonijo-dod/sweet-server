@@ -30,9 +30,9 @@ model Recipe {
   name            String
   slug            String                @unique
   description     String?
-  featuredImage   Image?                @relation(fields: [featuredImageId], references: [id])
-  featuredImageId Int?                  
   recipeId        Int?                  @unique
+  featuredImage   Image?                @relation(fields: [featuredImageId], references: [id], name: "FeaturedImage")
+  featuredImageId Int?
   galleryImages   ImageOnRecipe[]
   ingredients     IngredientsOnRecipe[]
   published       Boolean               @default(false)
@@ -47,8 +47,6 @@ model ImageOnRecipe {
   recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId Int
 
-  
-
   @@id([imageId, recipeId])
 }
 
@@ -57,7 +55,7 @@ model Image {
   url           String
   publicId      String
   recipes       ImageOnRecipe[]
-  featuredImages Recipe[]
+  featuredImage Recipe[] @relation(name: "FeaturedImage")
 }
 
 model Category {

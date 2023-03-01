@@ -1,4 +1,4 @@
-import { IsString, IsArray } from 'class-validator';
+import { IsString, IsArray, IsNumber } from 'class-validator';
 
 export class CreateRecipeDto {
   @IsString()
@@ -21,5 +21,8 @@ export class CreateRecipeDto {
 
   @IsArray()
   public galleryImages: []
+
+  @IsNumber()
+  public featuredImageId: number
 }
 

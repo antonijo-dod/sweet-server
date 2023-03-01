@@ -7,10 +7,13 @@ class RecipesController {
   public recipeService = new recipeService();
 
   public getRecipes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    
+    const query = req.query;
+    
     try {
-      const findAllRecipesData: Recipe[] = await this.recipeService.findAllRecipes();
+      const { data, meta} : { data: Recipe[], meta: any } = await this.recipeService.findAllRecipes(query);
 
-      res.status(200).json({ data: findAllRecipesData, message: 'findAll' });
+      res.status(200).json({ data, meta});
     } catch (error) {
       next(error);
     }
