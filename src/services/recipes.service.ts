@@ -2,17 +2,18 @@ import { PrismaClient, Recipe } from '@prisma/client';
 import { CreateRecipeDto } from '@dtos/recipes.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { isEmpty } from '@utils/util';
+import { Meta } from '@interfaces/meta.interface';
 
 class RecipeService {
   public recipe = new PrismaClient().recipe;
   public ingredient = new PrismaClient().ingredient;
   public categories = new PrismaClient().category;
 
-  public async findAllRecipes(query): Promise<Recipe[]> {
+  public async findAllRecipes(query): Promise<{ data: Recipe[], meta: Meta }> {
 
     const page = Number(query.page);
     const currentPage = page ? page : 1;
-    const resultsPerPage = 5;
+    const resultsPerPage = 4;
 
     let queryFilter = {}
 
@@ -25,20 +26,19 @@ class RecipeService {
       }
     }
 
-    // categories=[1,2]
     if (query.categories) {
       queryFilter = {
         ...queryFilter,
         categories: {
           some: {
-            OR: query.categories.split(",").map(categoryId => ({categoryId: Number(categoryId)}))
+            OR: query.categories.split(",").map(categoryId => ({ categoryId: Number(categoryId) }))
           }
-         }
+        }
       }
     }
 
     const count = await this.recipe.count({
-     where: queryFilter
+      where: queryFilter
     });
     const totalPages = Math.ceil(count / resultsPerPage);
 
@@ -50,7 +50,7 @@ class RecipeService {
         galleryImages: { include: { image: true } },
         featuredImage: true,
       },
-      where:queryFilter,
+      where: queryFilter,
       skip: (currentPage - 1) * resultsPerPage,
       take: resultsPerPage,
     });
@@ -66,7 +66,7 @@ class RecipeService {
     return findRecipe[0];
   }
 
-  public async createRecipe(recipeData: CreateRecipeDto, authUser): Promise<Recipe> {
+  public async createRecipe(recipeData: CreateRecipeDto, authUser ): Promise<Recipe> {
     // Create slug with slugify if slug is not provided from frontend
 
     if (isEmpty(recipeData)) throw new HttpException(400, "RecipeData is empty");

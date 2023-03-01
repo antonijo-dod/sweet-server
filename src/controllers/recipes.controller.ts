@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { User, Recipe } from '@prisma/client';
 import { CreateRecipeDto } from '@dtos/recipes.dto';
 import recipeService from '@services/recipes.service';
+import {Meta} from '@interfaces/meta.interface'
+import {RequestWithUser} from '@interfaces/auth.interface'
 
 class RecipesController {
   public recipeService = new recipeService();
@@ -11,7 +13,7 @@ class RecipesController {
     const query = req.query;
     
     try {
-      const { data, meta} : { data: Recipe[], meta: any } = await this.recipeService.findAllRecipes(query);
+      const { data, meta} : { data: Recipe[], meta: Meta } = await this.recipeService.findAllRecipes(query);
 
       res.status(200).json({ data, meta});
     } catch (error) {
@@ -30,7 +32,7 @@ class RecipesController {
     }
   };
 
-  public createRecipe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public createRecipe = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const recipeData: CreateRecipeDto = req.body;
       const createRecipeData: Recipe = await this.recipeService.createRecipe(recipeData, req.user);
