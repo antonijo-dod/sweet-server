@@ -6,8 +6,22 @@ import { isEmpty } from '@utils/util';
 class IngredientService {
   public ingredients = new PrismaClient().ingredient;
 
-  public async findAllIngredients(): Promise<Ingredient[]> {
-    const allIngredients: Ingredient[] = await this.ingredients.findMany();
+  public async findAllIngredients(query): Promise<Ingredient[]> {
+
+    let queryFilter = {}
+
+    if (query.search) {
+      queryFilter = {
+        ...queryFilter,
+        name: {
+          contains: query.search
+        }
+      }
+    }
+
+    const allIngredients: Ingredient[] = await this.ingredients.findMany({
+      where: queryFilter,
+    });
     return allIngredients;
   }
 

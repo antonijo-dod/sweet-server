@@ -15,6 +15,11 @@ enum role {
   USER
 }
 
+enum status {
+  published
+  draft
+}
+
 model User {
   id       Int      @id @default(autoincrement())
   email    String   @unique
@@ -39,6 +44,7 @@ model Recipe {
   author          User                  @relation(fields: [authorId], references: [id])
   authorId        Int
   categories      CategoryOnRecipe[]
+  status          status                @default(draft)
 }
 
 model ImageOnRecipe {

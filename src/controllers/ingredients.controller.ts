@@ -7,8 +7,11 @@ class IngredientsController {
   public ingredientService = new ingredientService();
 
   public getIngredients = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+
+    const query = req.query;
+    
     try {
-      const findAllIngredientsData: Ingredient[] = await this.ingredientService.findAllIngredients();
+      const findAllIngredientsData: Ingredient[] = await this.ingredientService.findAllIngredients(query);
 
       res.status(200).json({ data: findAllIngredientsData, message: 'findAll' });
     } catch (error) {

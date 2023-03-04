@@ -23,7 +23,7 @@ class AuthController {
       const userData: CreateUserDto = req.body;
       const loggedInUser = await this.authService.login(userData);
 
-      res.status(200).json({ data: loggedInUser, message: 'login' });
+      res.status(200).json(loggedInUser);
     } catch (error) {
       next(error);
     }
