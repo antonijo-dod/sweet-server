@@ -39,6 +39,9 @@ model Recipe {
   featuredImage   Image?                @relation(fields: [featuredImageId], references: [id], name: "FeaturedImage")
   featuredImageId Int?
   galleryImages   ImageOnRecipe[]
+  preparingTime   Int?
+  cookingTime     Int?
+  portions        Int?
   ingredients     IngredientsOnRecipe[]
   published       Boolean               @default(false)
   author          User                  @relation(fields: [authorId], references: [id])
@@ -61,7 +64,7 @@ model Image {
   url           String
   publicId      String
   recipes       ImageOnRecipe[]
-  featuredImage Recipe[] @relation(name: "FeaturedImage")
+  featuredImage Recipe[]        @relation(name: "FeaturedImage")
 }
 
 model Category {

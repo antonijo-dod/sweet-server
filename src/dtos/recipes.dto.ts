@@ -24,5 +24,15 @@ export class CreateRecipeDto {
 
   @IsNumber()
   public featuredImageId: number
+
+  @IsNumber()
+  public preparingTime: number
+
+  @IsNumber()
+  public cookingTime: number
+
+  @IsNumber()
+  public portions: number
+
 }
 
