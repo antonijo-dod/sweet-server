@@ -9,21 +9,20 @@ class RecipeService {
   public ingredient = new PrismaClient().ingredient;
   public categories = new PrismaClient().category;
 
-  public async findAllRecipes(query): Promise<{ data: Recipe[], meta: Meta }> {
-
+  public async findAllRecipes(query): Promise<{ data: Recipe[]; meta: Meta }> {
     const page = Number(query.page);
     const currentPage = page ? page : 1;
     const resultsPerPage = 4;
 
-    let queryFilter = {}
+    let queryFilter = {};
 
     if (query.search) {
       queryFilter = {
         ...queryFilter,
         name: {
-          contains: query.search
-        }
-      }
+          contains: query.search,
+        },
+      };
     }
 
     if (query.categories) {
@@ -31,20 +30,19 @@ class RecipeService {
         ...queryFilter,
         categories: {
           some: {
-            OR: query.categories.split(",").map(categoryId => ({ categoryId: Number(categoryId) }))
-          }
-        }
-      }
+            OR: query.categories.split(',').map(categoryId => ({ categoryId: Number(categoryId) })),
+          },
+        },
+      };
     }
 
     const count = await this.recipe.count({
-      where: queryFilter
+      where: queryFilter,
     });
     const totalPages = Math.ceil(count / resultsPerPage);
 
     const allRecipes: Recipe[] = await this.recipe.findMany({
-      include:
-      {
+      include: {
         ingredients: { include: { ingredient: true } },
         categories: { include: { category: true } },
         galleryImages: { include: { image: true } },
@@ -58,18 +56,26 @@ class RecipeService {
   }
 
   public async findRecipeBySlug(recipeSlug: string): Promise<Recipe> {
-    if (isEmpty(recipeSlug)) throw new HttpException(400, "RecipeSlug is empty");
+    if (isEmpty(recipeSlug)) throw new HttpException(400, 'RecipeSlug is empty');
 
-    const findRecipe: Recipe[] = await this.recipe.findMany({ where: { slug: recipeSlug }, include: { ingredients: { include: { ingredient: true } } } });
+    const findRecipe: Recipe[] = await this.recipe.findMany({
+      where: { slug: recipeSlug },
+      include: {
+        ingredients: { include: { ingredient: true } },
+        categories: { include: { category: true } },
+        galleryImages: { include: { image: true } },
+        featuredImage: true,
+      },
+    });
     if (!findRecipe) throw new HttpException(409, "Recipe doesn't exist");
 
     return findRecipe[0];
   }
 
-  public async createRecipe(recipeData: CreateRecipeDto, authUser ): Promise<Recipe> {
+  public async createRecipe(recipeData: CreateRecipeDto, authUser): Promise<Recipe> {
     // Create slug with slugify if slug is not provided from frontend
 
-    if (isEmpty(recipeData)) throw new HttpException(400, "RecipeData is empty");
+    if (isEmpty(recipeData)) throw new HttpException(400, 'RecipeData is empty');
 
     const { ingredients, categories, galleryImages, featuredImageId } = recipeData;
 
@@ -90,37 +96,37 @@ class RecipeService {
             amount: ingredient.amount,
             ingredient: {
               connect: {
-                id: ingredient.id
-              }
-            }
-          }))
+                id: ingredient.id,
+              },
+            },
+          })),
         },
         categories: {
           create: categories.map(categoryId => ({
             category: {
               connect: {
-                id: categoryId
-              }
-            }
-          }))
+                id: categoryId,
+              },
+            },
+          })),
         },
         galleryImages: {
           create: galleryImages.map(imageId => ({
             image: {
               connect: {
-                id: imageId
-              }
-            }
-          }))
-        }
+                id: imageId,
+              },
+            },
+          })),
+        },
       },
-      include: { ingredients: { include: { ingredient: true } }, categories: { include: { category: true } } }
+      include: { ingredients: { include: { ingredient: true } }, categories: { include: { category: true } } },
     });
     return createRecipeData;
   }
 
   public async updateRecipe(recipeId: number, recipeData: CreateRecipeDto): Promise<Recipe> {
-    if (isEmpty(recipeData)) throw new HttpException(400, "RecipeData is empty");
+    if (isEmpty(recipeData)) throw new HttpException(400, 'RecipeData is empty');
 
     const findRecipe: Recipe = await this.recipe.findUnique({ where: { id: recipeId }, include: { ingredients: true } });
     if (!findRecipe) throw new HttpException(409, "Recipe doesn't exist");
@@ -134,7 +140,8 @@ class RecipeService {
     if (checkIfCategoriesIdExist.length !== categories.length) throw new HttpException(409, "One or more categories doesn't exist");
 
     const updateRecipeData = await this.recipe.update({
-      where: { id: recipeId }, data: {
+      where: { id: recipeId },
+      data: {
         ...recipeData,
         ingredients: {
           deleteMany: {
@@ -145,10 +152,10 @@ class RecipeService {
             amount: ingredient.amount,
             ingredient: {
               connect: {
-                id: ingredient.id
-              }
-            }
-          }))
+                id: ingredient.id,
+              },
+            },
+          })),
         },
         categories: {
           deleteMany: {
@@ -158,10 +165,10 @@ class RecipeService {
           create: categories.map(categoryId => ({
             category: {
               connect: {
-                id: categoryId
-              }
-            }
-          }))
+                id: categoryId,
+              },
+            },
+          })),
         },
         galleryImages: {
           deleteMany: {
@@ -171,13 +178,13 @@ class RecipeService {
           create: images.map(imageId => ({
             image: {
               connect: {
-                id: imageId
-              }
-            }
-          }))
-        }
+                id: imageId,
+              },
+            },
+          })),
+        },
       },
-      include: { ingredients: { include: { ingredient: true } }, categories: { include: { category: true } } }
+      include: { ingredients: { include: { ingredient: true } }, categories: { include: { category: true } } },
     });
     return updateRecipeData;
   }
@@ -192,7 +199,6 @@ class RecipeService {
     const deleteRecipeData = await this.recipe.delete({ where: { id: recipeId } });
     return deleteRecipeData;
   }
-
 }
 
 export default RecipeService;
