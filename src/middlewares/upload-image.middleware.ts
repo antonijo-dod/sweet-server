@@ -1,10 +1,8 @@
-import { NextFunction, Response } from 'express';
-import multer from 'multer';
+import { NextFunction, Response, Request} from 'express';
 import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
 import {  v2 as cloudinary } from 'cloudinary';
 
-const uploadMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+const uploadMiddleware = async (req: Request, res: Response, next: NextFunction) => {
 
     cloudinary.config({
         cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

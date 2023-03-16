@@ -22,7 +22,7 @@ class ImagesRoute implements Routes {
 
   private initializeRoutes() {
     this.router.get(`${this.path}`, this.imagesController.getImages);
-    this.router.post(`${this.path}`, upload.array("photos", 12), adminAuthMiddleware, uploadMiddleware, this.imagesController.createImages);
+    this.router.post(`${this.path}`, upload.array("photos", 12), uploadMiddleware, this.imagesController.createImages);
     this.router.delete(`${this.path}/:id(\\d+)`, adminAuthMiddleware, this.imagesController.deleteImage);
   }
 }

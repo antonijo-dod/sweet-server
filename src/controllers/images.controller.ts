@@ -2,15 +2,17 @@ import { NextFunction, Request, Response } from 'express';
 import {   Image } from '@prisma/client';
 import { CreateImageDto } from '@dtos/images.dto';
 import imageService from '@services/images.service';
+import {Meta} from '@interfaces/meta.interface'
 
 class ImagesController {
   public imageService = new imageService();
 
   public getImages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const query = req.query
     try {
-      const findAllImages: Image[] = await this.imageService.findAllImages();
+      const {data, meta}: {data: Image[], meta: Meta} = await this.imageService.findAllImages(query);
 
-      res.status(200).json({ data: findAllImages, message: 'findAll' });
+      res.status(200).json({ data, meta}) 
     } catch (error) {
       next(error);
     }
