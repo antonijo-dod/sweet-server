@@ -36,7 +36,7 @@ class RecipeService {
             };
         }
 
-const count = await this.recipe.count({
+        const count = await this.recipe.count({
             where: queryFilter,
         });
         const totalPages = Math.ceil(count / resultsPerPage);

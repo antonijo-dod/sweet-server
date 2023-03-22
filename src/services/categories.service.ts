@@ -2,13 +2,32 @@ import { PrismaClient, Category } from '@prisma/client';
 import { CreateCategoryDto } from '@dtos/categories.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { isEmpty } from '@utils/util';
+import { Meta } from '@interfaces/meta.interface';
 
 class CategoryService {
     public category = new PrismaClient().category;
+    public recipe = new PrismaClient().recipe;
+    public categoryOnRecipe = new PrismaClient().categoryOnRecipe;
 
-    public async findAllCategories(): Promise<Category[]> {
-        const allCategories: Category[] = await this.category.findMany();
-        return allCategories;
+    public async findAllCategories(query): Promise<{ data: Category[]; meta: Meta }> {
+        const page = Number(query.page);
+        const currentPage = page ? page : 1;
+        const resultsPerPage = 4;
+
+        const queryFilter = {};
+
+        const count = await this.category.count({
+            where: queryFilter,
+        });
+
+        const totalPages = Math.ceil(count / resultsPerPage);
+
+        const allCategories: Category[] = await this.category.findMany({
+            where: queryFilter,
+            skip: (currentPage - 1) * resultsPerPage,
+            take: resultsPerPage,
+        });
+        return { data: allCategories, meta: { count: count, currentPage, totalPages, resultsPerPage } };
     }
 
     public async findCategoryBySlug(categorySlug: string): Promise<Category> {
@@ -47,6 +66,9 @@ class CategoryService {
 
         const findCategory: Category = await this.category.findUnique({ where: { id: categoryId } });
         if (!findCategory) throw new HttpException(409, "Category doesn't exist");
+        // Delete all category realtionship that belong to this category
+        const deleteReation = await this.categoryOnRecipe.deleteMany({ where: { categoryId: categoryId } });
+        if (!deleteReation) throw new HttpException(409, "Can't delete relationship");
 
         const deleteCategoryData = await this.category.delete({ where: { id: categoryId } });
         return deleteCategoryData;

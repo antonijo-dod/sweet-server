@@ -10,9 +10,9 @@ class ImageService {
     public async findAllImages(query): Promise<{ data: Image[]; meta: Meta }> {
         const page = Number(query.page);
         const currentPage = page ? page : 1;
-        const resultsPerPage = 4;
+        const resultsPerPage = 6;
 
-        let queryFilter = {};
+        const queryFilter = {};
 
         const count = await this.image.count({
             where: queryFilter,
@@ -25,7 +25,7 @@ class ImageService {
             skip: (currentPage - 1) * resultsPerPage,
             take: resultsPerPage,
         });
-        return {data: allImages, meta: {count, currentPage, totalPages, resultsPerPage}};
+        return { data: allImages, meta: { count, currentPage, totalPages, resultsPerPage } };
     }
 
     public async createImage(imageData): Promise<Image> {
