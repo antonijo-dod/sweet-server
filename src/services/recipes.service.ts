@@ -3,6 +3,7 @@ import { CreateRecipeDto } from '@dtos/recipes.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { isEmpty } from '@utils/util';
 import { Meta } from '@interfaces/meta.interface';
+import { RecipeStatus } from '@interfaces/recipes.interface';
 
 class RecipeService {
     public recipe = new PrismaClient().recipe;
@@ -198,6 +199,19 @@ class RecipeService {
 
         const deleteRecipeData = await this.recipe.delete({ where: { id: recipeId } });
         return deleteRecipeData;
+    }
+
+    public async updateStatusRecipe(recipeId: number, status: RecipeStatus): Promise<Recipe> {
+        if (isEmpty(status)) throw new HttpException(400, 'Recipe status is empty');
+
+        const findRecipe: Recipe = await this.recipe.findUnique({ where: { id: recipeId } });
+        if (!findRecipe) throw new HttpException(409, "Recipe doesn't exist");
+
+        const updateStatusRecipe = await this.recipe.update({
+            where: { id: recipeId },
+            data: { status },
+        });
+        return updateStatusRecipe;
     }
 }
 

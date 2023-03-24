@@ -64,6 +64,18 @@ class RecipesController {
             next(error);
         }
     };
+
+    public updateStatusRecipe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const recipeId = Number(req.params.id);
+            const recipeStatus = req.body.status;
+
+            const updateRecipeStatus: Recipe = await this.recipeService.updateStatusRecipe(recipeId, recipeStatus);
+            res.status(200).json({ data: updateRecipeStatus, message: 'updated' });
+        } catch (error) {
+            next(error);
+        }
+    };
 }
 
 export default RecipesController;
